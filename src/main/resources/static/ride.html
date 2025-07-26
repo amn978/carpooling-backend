@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create or Join Ride</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<h2>Ride Management</h2>
+
+<form id="rideForm">
+    <label for="origin">Origin:</label>
+    <input type="text" id="origin" required />
+
+    <label for="destination">Destination:</label>
+    <input type="text" id="destination" required />
+
+    <label for="date">Date:</label>
+    <input type="date" id="date" required />
+
+    <button type="submit">Create Ride</button>
+</form>
+
+<script>
+    const token = localStorage.getItem("token");
+
+    document.getElementById("rideForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const origin = document.getElementById("origin").value;
+      const destination = document.getElementById("destination").value;
+      const date = document.getElementById("date").value;
+
+      try {
+        const response = await fetch("http://localhost:8080/api/rides", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token
+          },
+          body: JSON.stringify({ origin, destination, date })
+        });
+
+        if (response.ok) {
+          alert("Ride created successfully!");
+        } else {
+          alert("Ride creation failed.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Server error.");
+      }
+    });
+</script>
+</body>
+</html>

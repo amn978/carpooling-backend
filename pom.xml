@@ -53,8 +53,10 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<version>1.18.32</version> <!-- Match with annotation processor -->
+			<scope>provided</scope>
 		</dependency>
+
 
 		<!-- JWT Dependencies -->
 		<dependency>

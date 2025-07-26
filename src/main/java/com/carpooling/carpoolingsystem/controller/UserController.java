@@ -10,41 +10,48 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")  // ✅ Changed from /users to /api
-@CrossOrigin(origins = "http://127.0.0.1:5500")  // ✅ Allow frontend access (adjust if different port)
+@RequestMapping("/api/users")  // Base path: /api/users
+@CrossOrigin(origins = "*") // ✅ For now, allow all during development/deployment
 public class UserController {
 
     @Autowired
     private UserRepository userRepository;
 
-    // ✅ Register a new user
+    // 🔹 Register a new user
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
-        User savedUser = userRepository.save(user);
-        userRepository.flush();  // Ensure ID is generated
-        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        try {
+            User savedUser = userRepository.save(user);
+            return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error registering user: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    // ✅ Login endpoint
+    // 🔹 Login user
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody User loginRequest) {
-        String email = loginRequest.getEmail();
-        String password = loginRequest.getPassword();
+        try {
+            String email = loginRequest.getEmail();
+            String password = loginRequest.getPassword();
 
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            User user = userRepository.findByEmail(email);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            }
+
+            if (!user.getPassword().equals(password)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid password");
+            }
+
+            return ResponseEntity.ok("Login successful for user: " + user.getUsername());
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error during login: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (!user.getPassword().equals(password)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid password");
-        }
-
-        return ResponseEntity.ok("Login successful for user: " + user.getUsername());
     }
 
-    // ✅ Get all users
-    @GetMapping("/users")
+    // 🔹 Get all users
+    @GetMapping("/")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userRepository.findAll();
         return new ResponseEntity<>(users, HttpStatus.OK);
